@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tablet Purchase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 80px;
+    }
+
+    .wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      margin-left: 300px;
+    }
+
+    .container {
+      display: flex;
+      gap: 40px;
+    }
+
+    .options {
+      max-width: 500px;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: #fff;
+      font-size: 14px;
+    }
+
+    button.selected {
+      border: 2px solid #0070f3;
+      background-color: #e0f0ff;
+    }
+
+    img {
+      max-width: 400px;
+      border-radius: 10px;
+    }
+
+    .price {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: rgb(184, 57, 38);
+    }
+
+    .buy-button {
+      margin-top: 20px;
+      padding: 20px 40px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      background-color: #0070f3;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .buy-button:hover {
+      background-color: #0057c2;
+    }
+
+    #warning {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(255, 0, 0, 0.9);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 1000;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <h1>Tablet, US Version, 256GB memory</h1>
+
+    <div class="container">
+      <div style="text-align: center;">
+        <img id="product-image" src="" alt="Tablet Image">
+        <button class="buy-button" onclick="goNext()">Buy Now</button>
+      </div>
+
+      <div class="options">
+        <div class="price">Total Price: $<span id="total-price">799</span></div>
+        <p><strong>Product:</strong> Liquid Retina Display, 13-inch, 8GB RAM, 256GB Storage</p>
+
+        <h3>Select Color:</h3>
+        <div id="colors">
+          <button class="color-option" data-color="blue1" data-price="0">Blue (+$0)</button>
+          <button class="color-option" data-color="purple1" data-price="0">Purple (+$0)</button>
+          <button class="color-option" data-color="space gray1" data-price="0">Space Gray (+$50)</button>
+          <button class="color-option" data-color="starlight1" data-price="0">Starlight (+$50)</button>
+        </div>
+
+        <h3>Storage Upgrade:</h3>
+        <div id="upgrade">
+          <button class="upgrade" data-price="0">256GB (+$0)</button>
+          <button class="upgrade" data-price="159">Upgrade to 512GB (+$159)</button>
+        </div>
+
+        <h3>Warranty:</h3>
+        <div id="warranty">
+          <button class="warranty" data-price="0">No Warranty (+$0)</button>
+          <button class="warranty" data-price="100">Yes (+$100)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 红色提示框 -->
+  <div id="warning">Please make a choice for each option</div>
+
+  <script>
+    const basePrice = 799;
+    let selectedColorPrice = 0;
+    let selectedUpgradePrice = 0;
+    let selectedWarrantyPrice = 0;
+
+    function updateTotalPrice() {
+      const total = basePrice + selectedColorPrice + selectedUpgradePrice + selectedWarrantyPrice;
+      document.getElementById("total-price").textContent = total;
+    }
+
+    function goNext() {
+      const colorSelected = document.querySelector('.color-option.selected');
+      const upgradeSelected = document.querySelector('.upgrade.selected');
+      const warrantySelected = document.querySelector('.warranty.selected');
+
+      if (!colorSelected || !upgradeSelected || !warrantySelected) {
+        showWarning();
+        return;
+      }
+      const data = {
+        color: colorSelected.textContent,
+        upgrade: upgradeSelected.textContent,
+        warranty: warrantySelected.textContent
+      };
+
+      localStorage.setItem("tablet", JSON.stringify(data));
+
+      window.location.href = 'phone.html'; // 可按流程调整
+    }
+
+    function showWarning() {
+      const warning = document.getElementById('warning');
+      warning.style.display = 'block';
+      setTimeout(() => {
+        warning.style.display = 'none';
+      }, 2000);
+    }
+
+    window.onload = function () {
+      // 默认颜色：blue1
+      const defaultColorButton = document.querySelector('.color-option[data-color="space gray1"]');
+      if (defaultColorButton) {
+        defaultColorButton.classList.add('selected');
+        document.getElementById('product-image').src = `images/space gray1.jpg`;
+        selectedColorPrice = parseInt(defaultColorButton.getAttribute('data-price'));
+      }
+
+      // 默认升级：Upgrade to 512GB (+$159)
+      const defaultUpgradeButton = document.querySelector('.upgrade[data-price="0"]');
+      if (defaultUpgradeButton) {
+        defaultUpgradeButton.classList.add('selected');
+        selectedUpgradePrice = parseInt(defaultUpgradeButton.getAttribute('data-price'));
+      }
+
+      // 默认保修：No Warranty (+$0)
+      const defaultWarrantyButton = document.querySelector('.warranty[data-price="100"]');
+      if (defaultWarrantyButton) {
+        defaultWarrantyButton.classList.add('selected');
+        selectedWarrantyPrice = parseInt(defaultWarrantyButton.getAttribute('data-price'));
+      }
+
+      updateTotalPrice();
+    };
+
+
+    document.querySelectorAll('.color-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.color-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedColorPrice = parseInt(btn.getAttribute('data-price'));
+        const color = btn.getAttribute('data-color');
+        document.getElementById('product-image').src = `images/${color}.jpg`;
+        updateTotalPrice();
+      });
+    });
+
+    document.querySelectorAll('.upgrade').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.upgrade').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedUpgradePrice = parseInt(btn.getAttribute('data-price'));
+        updateTotalPrice();
+      });
+    });
+
+    document.querySelectorAll('.warranty').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.warranty').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedWarrantyPrice = parseInt(btn.getAttribute('data-price'));
+        updateTotalPrice();
+      });
+    });
+  </script>
+
+</body>
+</html>
+
